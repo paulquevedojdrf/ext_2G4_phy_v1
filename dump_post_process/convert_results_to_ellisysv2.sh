@@ -30,17 +30,17 @@ ItemFormat:LE version=1.1")
 
 }
 {
-TI = $1 * 1000;
+TI = $1 * 1000.0;
 RF_CHANNEL=rfchannel($3);
 AA=$4;
 Mod=$5;
 Packet=$10;
 RSSI=-40;
 if (Mod == 16){
-printf("Item time=%i aa=%s rssi=%i rfchannel=%i phy=1Mbps rawdata=\"%s\"\n",TI,AA,RSSI, RF_CHANNEL, rtrim(Packet));
+printf("Item time=%.0f aa=%s rssi=%i rfchannel=%i phy=1Mbps rawdata=\"%s\"\n",TI,AA,RSSI, RF_CHANNEL, rtrim(Packet));
 }
 if (Mod == 32){
-printf("Item time=%i aa=%s rssi=%i rfchannel=%i phy=2Mbps rawdata=\"%s\"\n",TI,AA,RSSI, RF_CHANNEL, rtrim(Packet));
+printf("Item time=%.0f aa=%s rssi=%i rfchannel=%i phy=2Mbps rawdata=\"%s\"\n",TI,AA,RSSI, RF_CHANNEL, rtrim(Packet));
 }
 }'
 
