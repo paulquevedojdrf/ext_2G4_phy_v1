@@ -37,6 +37,7 @@ typedef enum {
 typedef struct {
   bs_time_t time; /* Simualted time when the call should be done */
   f_index_t f_index; /* Function type to be called */
+  bool pend; /* This element will run at the next time step which may be before its specified time */
 } fq_element_t;
 
 /**
@@ -87,6 +88,20 @@ void fq_call_next();
  * @param dev_nbr Which device interface
  */
 void fq_remove(uint32_t dev_nbr);
+
+/**
+ * Advance the function queue to the next element from the current time value
+ */
+void fq_step(bs_time_t current_time);
+
+/**
+ * Add a function for dev_nbr to the queue that should run at the next
+ * operation.
+ *
+ * @param time  The deadline for this function. The function must run
+ *              before or at this time limit
+ */
+void fq_add_pend(bs_time_t time, f_index_t index, uint32_t dev_nbr);
 
 /**
  * Free resources allocated by the function queue
