@@ -183,7 +183,9 @@ static void f_rx_search(uint d) {
     }
   }
 
-  fq_add(current_time + 1, Rx_Search, d);
+  bs_time_t expiry = BS_MIN(rx_status->scan_end + 1, rx_status->rx_s.abort.recheck_time);
+  fq_pend_until(expiry, Rx_Search, d);
+  //fq_add(current_time + 1, Rx_Search, d);
   return;
 }
 
@@ -567,9 +569,11 @@ int main(int argc, char *argv[]) {
     p2G4_handle_next_request(d);
   }
 
+  fq_step();
   current_time = fq_get_next_time();
   while ((nbr_active_devs > 0) && (current_time < args.sim_length)) {
     fq_call_next();
+    fq_step();
     current_time = fq_get_next_time();
   }
 

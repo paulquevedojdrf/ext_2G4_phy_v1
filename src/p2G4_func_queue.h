@@ -37,6 +37,7 @@ typedef enum {
 typedef struct {
   bs_time_t time; /* Simualted time when the call should be done */
   f_index_t f_index; /* Function type to be called */
+  bool pend;
 } fq_element_t;
 
 /**
@@ -87,6 +88,9 @@ void fq_call_next();
  * @param dev_nbr Which device interface
  */
 void fq_remove(uint32_t dev_nbr);
+
+void fq_step();
+void fq_pend_until(bs_time_t time, f_index_t index, uint32_t dev_nbr);
 
 /**
  * Free resources allocated by the function queue
