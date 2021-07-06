@@ -89,8 +89,24 @@ void fq_call_next();
  */
 void fq_remove(uint32_t dev_nbr);
 
+/**
+ * Advance the function queue to the next element from the current time value
+ */
 void fq_step(bs_time_t current_time);
-void fq_pend_until(bs_time_t time, f_index_t index, uint32_t dev_nbr);
+
+/**
+ * Add a function for dev_nbr to the queue that should run at the next
+ * operation.
+ *
+ * @param time  The deadline for this function. The function must run
+ *              before or at this time limit
+ */
+void fq_add_pend(bs_time_t time, f_index_t index, uint32_t dev_nbr);
+
+/**
+ * The function queue has been seeded. Sort it and get ready for execution
+ */
+void fq_start();
 
 /**
  * Free resources allocated by the function queue
