@@ -55,8 +55,8 @@ static int fq_compare(const void *pa, const void *pb)
     if (el_a->time > el_b->time) {
         return 1;
     }
-    uint32_t prio_a = ((uint32_t)el_a->f_index << 24) | (n_devs - a);
-    uint32_t prio_b = ((uint32_t)el_b->f_index << 24) | (n_devs - b);
+    uint32_t prio_a = ((uint32_t)el_a->f_index << 24) | (uint32_t)(n_devs - a);
+    uint32_t prio_b = ((uint32_t)el_b->f_index << 24) | (uint32_t)(n_devs - b);
 
     return ((prio_a > prio_b) ? -1 : 1);
 }
@@ -119,9 +119,9 @@ void fq_step(bs_time_t current_time){
     fq_sort();
 
     if (flush_pend) {
-        flush_pend = 0;
+        flush_pend = false;
 
-        bs_time_t now = f_queue[device_list[next_idx]].time;
+        bs_time_t now = f_queue[device_list[0]].time;
         for (int i = 0; i < n_devs; i++) {
             fq_element_t *el = &f_queue[i];
             if (el->pend) {
