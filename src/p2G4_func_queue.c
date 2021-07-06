@@ -6,25 +6,30 @@
 #include "p2G4_func_queue.h"
 #include "bs_oswrap.h"
 #include "bs_tracing.h"
+#include <stdlib.h>
 
 /*
  * Array with one element per device interface
  * Each interface can have 1 function pending
  */
 static fq_element_t *f_queue = NULL;
+static uint32_t *device_list = NULL;
 
+static uint32_t next_idx = 0;
 static uint32_t next_d = 0;
 static uint32_t n_devs = 0;
 
 static queable_f fptrs[N_funcs];
 
 void fq_init(uint32_t n_dev){
+  device_list = bs_calloc(n_dev, sizeof(uint32_t));
   f_queue = bs_calloc(n_dev, sizeof(fq_element_t));
   n_devs = n_dev;
 
   for (int i = 0 ; i < n_devs; i ++) {
     f_queue[i].time = TIME_NEVER;
     f_queue[i].f_index = None;
+    device_list[i] = i;
   }
 }
 
@@ -32,6 +37,33 @@ void fq_register_func(f_index_t type, queable_f fptr) {
   fptrs[type] = fptr;
 }
 
+static int fq_compare(const void *a, const void *b)
+{
+    fq_element_t *el_a = &f_queue[*(uint32_t *)a];
+    fq_element_t *el_b = &f_queue[*(uint32_t *)b];
+
+    if (el_a->time < el_b->time) {
+        return -1;
+    }
+    if (el_a->time > el_b->time) {
+        return 1;
+    }
+    uint32_t prio_a = ((uint32_t)el_a->f_index << 24) | (n_devs - *(uint32_t *)a);
+    uint32_t prio_b = ((uint32_t)el_b->f_index << 24) | (n_devs - *(uint32_t *)b);
+    if (prio_a > prio_b) {
+        return -1;
+    }
+    return 1;
+}
+
+static inline void fq_find_next()
+{
+    qsort(device_list, n_devs, sizeof(*device_list), fq_compare);
+    next_idx = 0;
+    next_d = device_list[0];
+}
+
+#if 0
 /**
  * Find the next function which should be executed,
  * Based on the following order, from left to right:
@@ -60,6 +92,7 @@ static inline void fq_find_next(){
     }
   }
 }
+#endif
 
 /**
  * Add a function for dev_nbr to the queue and reorder it
@@ -94,26 +127,26 @@ void fq_remove(uint32_t d){
   //fq_find_next();
 }
 
-void fq_step() {
+void fq_step(bs_time_t current_time) {
+    if (current_time == f_queue[device_list[++next_idx]].time) {
+        next_d = device_list[next_idx];
+        return;
+    }
     fq_find_next();
-    bs_time_t now = fq_get_next_time();
-    if (pend_time && now != pend_time) {
+
+    if (pend_time) {
         pend_time = 0;
+        bs_time_t now = f_queue[next_d].time;
+
         for (int i = 0; i < n_devs; i++) {
             fq_element_t *el = &f_queue[i];
-            if (!el->pend) {
-                continue;
-            }
-            el->pend = false;
-            el->time = now;
-            if (el->f_index > f_queue[next_d].f_index) {
-                next_d = i;
-                //printf("   next_d is now %u f_index %d\n", next_d, f_queue[next_d].f_index);
+            if (el->pend) {
+                el->pend = false;
+                el->time = now;
             }
         }
+        fq_find_next();
     }
-    //printf("fq_step resolved next_d %u time %llu f_index %d\n",
-    //        next_d, f_queue[next_d].time, f_queue[next_d].f_index);
 }
 
 /**
@@ -133,6 +166,8 @@ bs_time_t fq_get_next_time(){
 }
 
 void fq_free(){
-  if ( f_queue != NULL )
+  if ( f_queue != NULL ) {
     free(f_queue);
+    free(device_list);
+  }
 }

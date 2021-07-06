@@ -89,7 +89,7 @@ void fq_call_next();
  */
 void fq_remove(uint32_t dev_nbr);
 
-void fq_step();
+void fq_step(bs_time_t current_time);
 void fq_pend_until(bs_time_t time, f_index_t index, uint32_t dev_nbr);
 
 /**
