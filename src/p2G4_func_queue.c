@@ -123,7 +123,7 @@ void fq_step(bs_time_t current_time) {
     uint32_t head_dev = device_list[0];
 
     bs_time_t now = f_queue[head_dev].time;
-    for (int i = 0; i < n_devs; i++) {
+    for (uint32_t i = 0; i < n_devs; i++) {
       fq_element_t *el = &f_queue[i];
       if ( el->pend ) {
         el->pend = false;
