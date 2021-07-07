@@ -18,6 +18,7 @@ static uint32_t *device_list = NULL;
 static uint32_t next_idx = 0;
 static uint32_t n_devs = 0;
 static bool flush_pend = false;
+static bool force_sort = false;
 
 static queable_f fptrs[N_funcs];
 
@@ -67,14 +68,21 @@ static inline void fq_sort()
     next_idx = 0;
 }
 
+static inline void fq_add_entry(bs_time_t time, f_index_t index, uint32_t dev_nbr)
+{
+  fq_element_t *el = &f_queue[dev_nbr];
+  if (el->time == time) {
+      force_sort = true;
+  }
+  el->time = time;
+  el->f_index = index;
+}
+
 /**
  * Add a function for dev_nbr to the queue
  */
 void fq_add(bs_time_t time, f_index_t index, uint32_t dev_nbr) {
-  fq_element_t *el = &f_queue[dev_nbr];
-  el->time = time;
-  el->f_index = index;
-  el->pend = false;
+  fq_add_entry(time, index, dev_nbr);
 }
 
 /**
@@ -85,10 +93,8 @@ void fq_add(bs_time_t time, f_index_t index, uint32_t dev_nbr) {
  *              before or at this time limit
  */
 void fq_add_pend(bs_time_t time, f_index_t index, uint32_t dev_nbr) {
-  fq_element_t *el = &f_queue[dev_nbr];
-  el->time = time;
-  el->f_index = index;
-  el->pend = true;
+  fq_add_entry(time, index, dev_nbr);
+  f_queue[dev_nbr].pend = true;
   flush_pend = true;
 }
 
@@ -112,16 +118,24 @@ void fq_start(){
  * Advance the function queue to the next element from the current time value
  */
 void fq_step(bs_time_t current_time){
-    next_idx++;
-    if (current_time == f_queue[device_list[next_idx]].time) {
-        return;
+    if (force_sort) {
+        force_sort = false;
     }
+    else {
+        next_idx++;
+        if (current_time == f_queue[device_list[next_idx]].time) {
+            return;
+        }
+    }
+    force_sort = false;
     fq_sort();
 
     if (flush_pend) {
         flush_pend = false;
 
-        bs_time_t now = f_queue[device_list[0]].time;
+        uint32_t head_dev = device_list[0];
+
+        bs_time_t now = f_queue[head_dev].time;
         for (int i = 0; i < n_devs; i++) {
             fq_element_t *el = &f_queue[i];
             if (el->pend) {
