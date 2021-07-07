@@ -104,11 +104,6 @@ void fq_step(bs_time_t current_time);
 void fq_add_pend(bs_time_t time, f_index_t index, uint32_t dev_nbr);
 
 /**
- * The function queue has been seeded. Sort it and get ready for execution
- */
-void fq_start();
-
-/**
  * Free resources allocated by the function queue
  *
  * This must be called before exiting to clean up any memory allocated by the
