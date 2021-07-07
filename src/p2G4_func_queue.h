@@ -37,7 +37,7 @@ typedef enum {
 typedef struct {
   bs_time_t time; /* Simualted time when the call should be done */
   f_index_t f_index; /* Function type to be called */
-  bool pend;
+  bool pend; /* This element will run at the next time step which may be before its specified time */
 } fq_element_t;
 
 /**

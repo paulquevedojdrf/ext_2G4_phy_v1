@@ -74,6 +74,9 @@ static inline void fq_sort() {
 void fq_add(bs_time_t time, f_index_t index, uint32_t dev_nbr) {
   fq_element_t *el = &f_queue[dev_nbr];
   if ( el->time == time ) {
+    /* We are adding a new operation that must be run at the current time
+     * As such we need to re-sort the function queue to take into account this
+     * new operation */
     force_sort = true;
   }
   el->time = time;
