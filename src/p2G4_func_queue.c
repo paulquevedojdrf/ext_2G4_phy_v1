@@ -27,7 +27,7 @@ void fq_init(uint32_t n_dev){
   f_queue = bs_calloc(n_dev, sizeof(fq_element_t));
   n_devs = n_dev;
 
-  for (int i = 0 ; i < n_devs; i ++) {
+  for (uint32_t i = 0 ; i < n_devs; i ++) {
     f_queue[i].time = TIME_NEVER;
     f_queue[i].f_index = None;
     device_list[i] = i;
