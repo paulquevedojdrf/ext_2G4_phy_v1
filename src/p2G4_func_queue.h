@@ -90,9 +90,9 @@ void fq_call_next();
 void fq_remove(uint32_t dev_nbr);
 
 /**
- * Advance the function queue to the next element from the current time value
+ * Advance the function queue forward one step
  */
-void fq_step(bs_time_t current_time);
+void fq_step(void);
 
 /**
  * Add a function for dev_nbr to the queue that should run at the next
