@@ -15,6 +15,7 @@
 static fq_element_t *f_queue = NULL;
 static uint32_t *device_list = NULL;
 
+static bs_time_t current_time = 0;
 static uint32_t next_idx = 0;
 static uint32_t n_devs = 0;
 static bool flush_pend = false;
@@ -110,7 +111,7 @@ void fq_remove(uint32_t d){
  * Advance the function queue to the next element for the current time value
  * If time advances, re-sort the function queue
  */
-void fq_step(bs_time_t current_time) {
+void fq_step(void) {
   if ( !force_sort ) {
     next_idx++;
     if (current_time == f_queue[device_list[next_idx]].time) {
@@ -135,6 +136,8 @@ void fq_step(bs_time_t current_time) {
     }
     fq_sort();
   }
+
+  current_time = fq_get_next_time();
 }
 
 /**
